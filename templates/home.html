@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - Jersey Events{% endblock %}
+
+{% block content %}
+<h1>Welcome to Jersey Events</h1>
+<p>Discover the best events happening in Jersey!</p>
+
+{% if user.is_authenticated %}
+    <p>You are logged in as: <strong>{{ user.email }}</strong></p>
+    <p>Your role: <strong>{{ user.get_role_display }}</strong></p>
+{% else %}
+    <p><a href="{% url 'accounts:signup' %}">Sign up</a> to start exploring events!</p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}Profile - Jersey Events{% endblock %}
+
+{% block content %}
+<h2>My Profile</h2>
+<table>
+    <tr>
+        <td><strong>Email:</strong></td>
+        <td>{{ user.email }}</td>
+    </tr>
+    <tr>
+        <td><strong>Username:</strong></td>
+        <td>{{ user.username }}</td>
+    </tr>
+    <tr>
+        <td><strong>Role:</strong></td>
+        <td>{{ user.get_role_display }}</td>
+    </tr>
+    <tr>
+        <td><strong>Joined:</strong></td>
+        <td>{{ user.date_joined|date:"F d, Y" }}</td>
+    </tr>
+</table>
+
+{% if user.role == 'CUSTOMER' %}
+    <p><em>As a Customer, you can list events for others to discover!</em></p>
+{% elif user.role == 'USER' %}
+    <p><em>Browse events and purchase tickets!</em></p>
+{% endif %}
+{% endblock %}
