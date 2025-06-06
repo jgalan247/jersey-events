@@ -22,3 +22,10 @@ staticfiles/
 
 # Docker
 .docker/
+
+# Media files
+media/
+*.jpg
+*.jpeg
+*.png
+*.gif
