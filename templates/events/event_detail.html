@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ event.title }} - Jersey Events{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-lg-8">
+            <h1 class="mb-4">{{ event.title }}</h1>
+            
+            {% if event.image %}
+                <img src="{{ event.image.url }}" class="img-fluid rounded mb-4" alt="{{ event.title }}">
+            {% else %}
+                <div class="bg-secondary d-flex align-items-center justify-content-center rounded mb-4" style="height: 400px;">
+                    <span class="text-white h3">No image available</span>
+                </div>
+            {% endif %}
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">About this event</h5>
+                    <p class="card-text" style="white-space: pre-line;">{{ event.description }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Event Details</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <i class="bi bi-calendar"></i> 
+                            <strong>Date:</strong> {{ event.date_time|date:"l, d F Y" }}
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-clock"></i> 
+                            <strong>Time:</strong> {{ event.date_time|date:"H:i" }}
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-geo-alt"></i> 
+                            <strong>Location:</strong> {{ event.location }}
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-tag"></i> 
+                            <strong>Category:</strong> {{ event.get_category_display }}
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-people"></i> 
+                            <strong>Capacity:</strong> {{ event.capacity }} people
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Tickets</h5>
+                    <p class="h3 text-primary mb-3">£{{ event.price }}</p>
+                    <p class="text-muted mb-3">{{ event.available_tickets }} tickets available</p>
+                    
+                    {% if event.is_upcoming %}
+                        {% if user.is_authenticated %}
+                            <button class="btn btn-primary btn-lg w-100" disabled>
+                                Buy Tickets (Coming Soon)
+                            </button>
+                        {% else %}
+                            <a href="{% url 'accounts:login' %}" class="btn btn-primary btn-lg w-100">
+                                Login to Buy Tickets
+                            </a>
+                        {% endif %}
+                    {% else %}
+                        <button class="btn btn-secondary btn-lg w-100" disabled>
+                            Event Has Passed
+                        </button>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Organizer</h5>
+                    <p class="mb-0">{{ event.owner.get_full_name|default:event.owner.email }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="mt-4">
+        <a href="{% url 'events:event_list' %}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Events
+        </a>
+    </div>
+</div>
+{% endblock %}

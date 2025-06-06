@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block title %}Upcoming Events - Jersey Events{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Upcoming Events</h1>
+    
+    {% if events %}
+        <div class="row">
+            {% for event in events %}
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100">
+                        {% if event.image %}
+                            <img src="{{ event.image.url }}" class="card-img-top" alt="{{ event.title }}" style="height: 200px; object-fit: cover;">
+                        {% else %}
+                            <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" style="height: 200px;">
+                                <span class="text-white">No image available</span>
+                            </div>
+                        {% endif %}
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">{{ event.title }}</h5>
+                            <p class="card-text">
+                                <small class="text-muted">
+                                    <i class="bi bi-tag"></i> {{ event.get_category_display }}<br>
+                                    <i class="bi bi-calendar"></i> {{ event.date_time|date:"d M Y, H:i" }}<br>
+                                    <i class="bi bi-geo-alt"></i> {{ event.location }}<br>
+                                    <i class="bi bi-currency-pound"></i> £{{ event.price }}
+                                </small>
+                            </p>
+                            <p class="card-text flex-grow-1">{{ event.description|truncatewords:20 }}</p>
+                            <a href="{% url 'events:event_detail' event.pk %}" class="btn btn-primary mt-auto">View Details</a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        
+        {% if is_paginated %}
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                        </li>
+                    {% endif %}
+                    
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                        {% else %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+    {% else %}
+        <div class="alert alert-info" role="alert">
+            <h4 class="alert-heading">No events yet!</h4>
+            <p>There are no upcoming events at the moment. Check back soon!</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
