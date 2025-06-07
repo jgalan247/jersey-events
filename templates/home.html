@@ -11,7 +11,7 @@
         <p>Browse upcoming events, purchase tickets, and never miss out on the best experiences Jersey has to offer.</p>
         <a class="btn btn-primary btn-lg" href="{% url 'events:event_list' %}" role="button">Browse Events</a>
         {% if user.is_authenticated and user.role == 'CUSTOMER' %}
-            <a class="btn btn-success btn-lg ms-2" href="#" role="button">List Your Event</a>
+            <a class="btn btn-success btn-lg ms-2" href="{% url 'events:event_create' %}" role="button">List Your Event</a>
         {% endif %}
     </div>
     

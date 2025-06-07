@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block title %}Payment Successful - Jersey Events{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body text-center">
+                    <i class="bi bi-check-circle text-success" style="font-size: 4rem;"></i>
+                    <h2 class="mt-3">Payment Successful!</h2>
+                    <p class="lead">Your tickets have been confirmed.</p>
+                    
+                    <div class="alert alert-success mt-4">
+                        <strong>Order ID:</strong> {{ order.order_id }}<br>
+                        <strong>Total Paid:</strong> £{{ order.total_amount }}
+                    </div>
+                    
+                    <div class="mt-4">
+                        <h5>Order Details</h5>
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Event</th>
+                                        <th>Date</th>
+                                        <th>Quantity</th>
+                                        <th>Price</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for ticket in order.tickets.all %}
+                                        <tr>
+                                            <td>{{ ticket.event.title }}</td>
+                                            <td>{{ ticket.event.date_time|date:"d M Y, H:i" }}</td>
+                                            <td>{{ ticket.quantity }}</td>
+                                            <td>£{{ ticket.total_price }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info mt-4">
+                        <i class="bi bi-envelope"></i> 
+                        A confirmation email has been sent to <strong>{{ order.user.email }}</strong>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <a href="{% url 'tickets:my_orders' %}" class="btn btn-primary">
+                            View My Orders
+                        </a>
+                        <a href="{% url 'events:event_list' %}" class="btn btn-outline-primary">
+                            Browse More Events
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Add this after the Organizer card -->
+            <div class="card mt-3">
+                <div class="card-body">
+                    <h5 class="card-title">Add to Calendar</h5>
+                    <div class="d-grid gap-2">
+                        <!-- Google Calendar -->
+                        <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text={{ event.title|urlencode }}&dates={{ event.date_time|date:'Ymd' }}T{{ event.date_time|date:'His' }}/{{ event.date_time|date:'Ymd' }}T{{ event.date_time|date:'His' }}&location={{ event.location|urlencode }}&details={{ event.description|urlencode|truncatewords:50 }}" 
+                           target="_blank" 
+                           class="btn btn-outline-danger">
+                            <i class="bi bi-google"></i> Add to Google Calendar
+                        </a>
+                        
+                        <!-- Outlook -->
+                        <a href="https://outlook.live.com/calendar/0/deeplink/compose?subject={{ event.title|urlencode }}&startdt={{ event.date_time|date:'Ymd' }}T{{ event.date_time|date:'His' }}&location={{ event.location|urlencode }}&body={{ event.description|urlencode|truncatewords:50 }}" 
+                           target="_blank" 
+                           class="btn btn-outline-primary">
+                            <i class="bi bi-microsoft"></i> Add to Outlook
+                        </a>
+                    </div>
+                </div>
+            </div>
+{% endblock %}

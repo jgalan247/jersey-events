@@ -1,3 +1,4 @@
+version: '3.8'
 
 services:
   db:
@@ -5,9 +6,9 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
-      POSTGRES_DB: jersey_events
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      - POSTGRES_DB=jersey_events
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
     ports:
       - "5432:5432"
 
@@ -20,8 +21,8 @@ services:
       - "8000:8000"
     depends_on:
       - db
-    env_file:
-      - .env
+    environment:
+      - DEBUG=True
 
 volumes:
   postgres_data:

@@ -3,29 +3,180 @@
 {% block title %}Profile - Jersey Events{% endblock %}
 
 {% block content %}
-<h2>My Profile</h2>
-<table>
-    <tr>
-        <td><strong>Email:</strong></td>
-        <td>{{ user.email }}</td>
-    </tr>
-    <tr>
-        <td><strong>Username:</strong></td>
-        <td>{{ user.username }}</td>
-    </tr>
-    <tr>
-        <td><strong>Role:</strong></td>
-        <td>{{ user.get_role_display }}</td>
-    </tr>
-    <tr>
-        <td><strong>Joined:</strong></td>
-        <td>{{ user.date_joined|date:"F d, Y" }}</td>
-    </tr>
-</table>
-
-{% if user.role == 'CUSTOMER' %}
-    <p><em>As a Customer, you can list events for others to discover!</em></p>
-{% elif user.role == 'USER' %}
-    <p><em>Browse events and purchase tickets!</em></p>
-{% endif %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-4">
+            <!-- User Info Card -->
+            <div class="card mb-4">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <i class="bi bi-person-circle" style="font-size: 5rem; color: #6c757d;"></i>
+                    </div>
+                    <h4>{{ user.get_full_name|default:user.username }}</h4>
+                    <p class="text-muted">{{ user.email }}</p>
+                    <span class="badge bg-primary">{{ user.get_role_display }}</span>
+                    <hr>
+                    <p class="text-muted small">Member since {{ user.date_joined|date:"F Y" }}</p>
+                </div>
+            </div>
+            
+            <!-- Quick Actions -->
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">Quick Actions</h6>
+                </div>
+                <div class="list-group list-group-flush">
+                    <a href="{% url 'events:event_list' %}" class="list-group-item list-group-item-action">
+                        <i class="bi bi-calendar-event"></i> Browse Events
+                    </a>
+                    <a href="{% url 'tickets:my_orders' %}" class="list-group-item list-group-item-action">
+                        <i class="bi bi-receipt"></i> My Orders
+                    </a>
+                    {% if user.role == 'CUSTOMER' %}
+                        <a href="{% url 'events:my_events' %}" class="list-group-item list-group-item-action">
+                            <i class="bi bi-calendar-check"></i> My Events
+                        </a>
+                        <a href="{% url 'events:event_create' %}" class="list-group-item list-group-item-action">
+                            <i class="bi bi-plus-circle"></i> Create Event
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <!-- Customer Dashboard -->
+            {% if user.role == 'CUSTOMER' %}
+                <h3 class="mb-4">Event Organizer Dashboard</h3>
+                
+                <!-- Event Statistics -->
+                <div class="row mb-4">
+                    <div class="col-md-3 mb-3">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <h5 class="card-title">Total Events</h5>
+                                <p class="card-text display-6">{{ total_events }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <h5 class="card-title text-warning">Pending</h5>
+                                <p class="card-text display-6">{{ pending_events }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <h5 class="card-title text-success">Approved</h5>
+                                <p class="card-text display-6">{{ approved_events }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card text-center">
+                            <div class="card-body">
+                                <h5 class="card-title text-danger">Rejected</h5>
+                                <p class="card-text display-6">{{ rejected_events }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Sales Statistics -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="card-title text-muted">Total Tickets Sold</h6>
+                                <p class="card-text display-5">{{ total_tickets_sold }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="card-title text-muted">Total Revenue</h6>
+                                <p class="card-text display-5">£{{ total_revenue|floatformat:2 }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Upcoming Events -->
+                {% if upcoming_events %}
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h6 class="mb-0">Your Upcoming Events</h6>
+                        </div>
+                        <div class="list-group list-group-flush">
+                            {% for event in upcoming_events %}
+                                <a href="{% url 'events:event_detail' event.pk %}" class="list-group-item list-group-item-action">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">{{ event.title }}</h6>
+                                        <small>{{ event.date_time|date:"d M Y" }}</small>
+                                    </div>
+                                    <p class="mb-1 text-muted">{{ event.location }}</p>
+                                    <small>{{ event.tickets_sold.count }} tickets sold</small>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+            {% endif %}
+            
+            <!-- Purchase Statistics (All Users) -->
+            <h3 class="mb-4">Purchase History</h3>
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h6 class="card-title text-muted">Total Orders</h6>
+                            <p class="card-text display-6">{{ total_orders }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h6 class="card-title text-muted">Completed</h6>
+                            <p class="card-text display-6">{{ completed_orders }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h6 class="card-title text-muted">Total Spent</h6>
+                            <p class="card-text display-6">£{{ total_spent|floatformat:2 }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Upcoming Tickets -->
+            {% if upcoming_tickets %}
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0">Your Upcoming Events</h6>
+                    </div>
+                    <div class="list-group list-group-flush">
+                        {% for ticket in upcoming_tickets %}
+                            <a href="{% url 'events:event_detail' ticket.event.pk %}" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">{{ ticket.event.title }}</h6>
+                                    <small>{{ ticket.event.date_time|date:"d M Y, H:i" }}</small>
+                                </div>
+                                <p class="mb-1 text-muted">{{ ticket.event.location }}</p>
+                                <small>{{ ticket.quantity }} ticket(s) - Ticket ID: {{ ticket.ticket_id }}</small>
+                            </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
 {% endblock %}

@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if is_update %}Edit{% else %}Create{% endif %} Event - Jersey Events{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        {% if is_update %}
+                            Edit Event
+                            {% if object.status == 'REJECTED' %}
+                                <span class="badge bg-danger">Rejected</span>
+                            {% elif object.status == 'PENDING' %}
+                                <span class="badge bg-warning">Pending</span>
+                            {% endif %}
+                        {% else %}
+                            Create New Event
+                        {% endif %}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {{ form.non_field_errors }}
+                            </div>
+                        {% endif %}
+                        
+                        <div class="mb-3">
+                            {{ form.title.label_tag }}
+                            {{ form.title }}
+                            {% if form.title.errors %}
+                                <div class="text-danger">{{ form.title.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.description.label_tag }}
+                            {{ form.description }}
+                            {% if form.description.errors %}
+                                <div class="text-danger">{{ form.description.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.category.label_tag }}
+                                {{ form.category }}
+                                {% if form.category.errors %}
+                                    <div class="text-danger">{{ form.category.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                {{ form.date_time.label_tag }}
+                                {{ form.date_time }}
+                                {% if form.date_time.errors %}
+                                    <div class="text-danger">{{ form.date_time.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.location.label_tag }}
+                            {{ form.location }}
+                            {% if form.location.errors %}
+                                <div class="text-danger">{{ form.location.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form.price.label_tag }}
+                                {{ form.price }}
+                                {% if form.price.help_text %}
+                                    <small class="form-text text-muted">{{ form.price.help_text }}</small>
+                                {% endif %}
+                                {% if form.price.errors %}
+                                    <div class="text-danger">{{ form.price.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                {{ form.capacity.label_tag }}
+                                {{ form.capacity }}
+                                {% if form.capacity.help_text %}
+                                    <small class="form-text text-muted">{{ form.capacity.help_text }}</small>
+                                {% endif %}
+                                {% if form.capacity.errors %}
+                                    <div class="text-danger">{{ form.capacity.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form.image.label_tag }}
+                            {{ form.image }}
+                            {% if form.image.help_text %}
+                                <small class="form-text text-muted">{{ form.image.help_text }}</small>
+                            {% endif %}
+                            {% if form.image.errors %}
+                                <div class="text-danger">{{ form.image.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> 
+                            {% if is_update %}
+                                {% if object.status == 'REJECTED' %}
+                                    Your event was rejected. After editing, it will be resubmitted for approval.
+                                {% else %}
+                                    Your changes will be saved and the event will remain in pending status.
+                                {% endif %}
+                            {% else %}
+                                Your event will be reviewed by our team before being published.
+                            {% endif %}
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{% url 'events:my_events' %}" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">
+                                {% if is_update %}Update{% else %}Submit{% endif %} Event
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

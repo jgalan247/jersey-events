@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+
+{% block title %}Shopping Cart - Jersey Events{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Shopping Cart</h1>
+    
+    {% if cart.items.exists %}
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Cart Items</h5>
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Event</th>
+                                        <th>Date</th>
+                                        <th>Price</th>
+                                        <th>Quantity</th>
+                                        <th>Total</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in cart.items.all %}
+                                        <tr>
+                                            <td>
+                                                <strong>{{ item.event.title }}</strong><br>
+                                                <small class="text-muted">{{ item.event.location }}</small>
+                                            </td>
+                                            <td>{{ item.event.date_time|date:"d M Y, H:i" }}</td>
+                                            <td>£{{ item.event.price }}</td>
+                                            <td>
+                                                <form method="post" action="{% url 'tickets:update_cart_item' item.pk %}" class="d-inline">
+                                                    {% csrf_token %}
+                                                    <div class="input-group input-group-sm" style="width: 100px;">
+                                                        <input type="number" name="quantity" value="{{ item.quantity }}" 
+                                                               min="1" max="{{ item.event.available_tickets }}" 
+                                                               class="form-control form-control-sm">
+                                                        <button type="submit" class="btn btn-sm btn-outline-secondary">
+                                                            <i class="bi bi-arrow-repeat"></i>
+                                                        </button>
+                                                    </div>
+                                                </form>
+                                            </td>
+                                            <td>£{{ item.total_price }}</td>
+                                            <td>
+                                                <form method="post" action="{% url 'tickets:remove_from_cart' item.pk %}" class="d-inline">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-sm btn-danger">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Order Summary</h5>
+                        <hr>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Subtotal:</span>
+                            <strong>£{{ cart.total_amount }}</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Processing Fee:</span>
+                            <strong>£0.00</strong>
+                        </div>
+                        <hr>
+                        <div class="d-flex justify-content-between mb-3">
+                            <span class="h5">Total:</span>
+                            <strong class="h5">£{{ cart.total_amount }}</strong>
+                        </div>
+                        
+                        <form method="post" action="{% url 'tickets:checkout' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-primary btn-lg w-100">
+                                <i class="bi bi-credit-card"></i> Proceed to Checkout
+                            </button>
+                        </form>
+                        
+                        <div class="text-center mt-3">
+                            <a href="{% url 'events:event_list' %}" class="text-muted">
+                                <i class="bi bi-arrow-left"></i> Continue Shopping
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alert alert-info mt-3">
+                    <i class="bi bi-info-circle"></i> 
+                    <small>All prices are in GBP. Payment is processed securely via Stripe.</small>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="alert alert-info" role="alert">
+            <h4 class="alert-heading">Your cart is empty!</h4>
+            <p>Browse our events and add some tickets to your cart.</p>
+            <hr>
+            <a href="{% url 'events:event_list' %}" class="btn btn-primary">
+                <i class="bi bi-calendar-event"></i> Browse Events
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

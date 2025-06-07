@@ -16,6 +16,10 @@ class UserAdmin(BaseUserAdmin):
         ('Role Information', {'fields': ('role',)}),
     )
     
-    add_fieldsets = BaseUserAdmin.add_fieldsets + (
-        ('Role Information', {'fields': ('role',)}),
+    # Fixed add_fieldsets to include email
+    add_fieldsets = (
+        (None, {
+            'classes': ('wide',),
+            'fields': ('email', 'username', 'password1', 'password2', 'role'),
+        }),
     )

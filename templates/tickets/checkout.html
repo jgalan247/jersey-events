@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+
+{% block title %}Checkout - Jersey Events{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">Secure Checkout</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <strong>Order Total:</strong> £{{ order.total_amount }}
+                    </div>
+                    
+                    <form id="payment-form">
+                        <div id="payment-element" class="mb-3">
+                            <!-- Stripe Elements will be inserted here -->
+                        </div>
+                        
+                        <div id="error-message" class="alert alert-danger d-none" role="alert">
+                            <!-- Error messages will be displayed here -->
+                        </div>
+                        
+                        <button id="submit" class="btn btn-primary w-100" type="submit">
+                            <span id="button-text">Pay Now</span>
+                            <span id="spinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="text-center mt-3">
+                <small class="text-muted">
+                    <i class="bi bi-lock"></i> Secure payment powered by Stripe
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+    const stripe = Stripe('{{ stripe_public_key }}');
+    const clientSecret = '{{ client_secret }}';
+    const orderID = '{{ order.order_id }}';
+    
+    // Create an instance of Elements
+    const elements = stripe.elements({
+        clientSecret: clientSecret,
+    });
+    
+    // Create and mount the Payment Element
+    const paymentElement = elements.create('payment');
+    paymentElement.mount('#payment-element');
+    
+    // Handle form submission
+    const form = document.getElementById('payment-form');
+    const submitButton = document.getElementById('submit');
+    const spinner = document.getElementById('spinner');
+    const buttonText = document.getElementById('button-text');
+    const errorMessage = document.getElementById('error-message');
+    
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        
+        // Disable the submit button
+        submitButton.disabled = true;
+        spinner.classList.remove('d-none');
+        buttonText.textContent = 'Processing...';
+        
+        const {error} = await stripe.confirmPayment({
+            elements,
+            confirmParams: {
+                return_url: window.location.origin + '/tickets/payment-success/' + orderID + '/',
+            },
+        });
+        
+        if (error) {
+            // Show error to customer
+            errorMessage.textContent = error.message;
+            errorMessage.classList.remove('d-none');
+            
+            // Re-enable the submit button
+            submitButton.disabled = false;
+            spinner.classList.add('d-none');
+            buttonText.textContent = 'Pay Now';
+        }
+    });
+</script>
+{% endblock %}

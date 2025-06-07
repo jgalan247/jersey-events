@@ -61,9 +61,21 @@
                     
                     {% if event.is_upcoming %}
                         {% if user.is_authenticated %}
-                            <button class="btn btn-primary btn-lg w-100" disabled>
-                                Buy Tickets (Coming Soon)
-                            </button>
+                            {% if event.available_tickets > 0 %}
+                                <form method="post" action="{% url 'tickets:add_to_cart' event.pk %}">
+                                    {% csrf_token %}
+                                    <div class="input-group mb-3">
+                                        <input type="number" name="quantity" value="1" min="1" max="{{ event.available_tickets }}" class="form-control">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="bi bi-cart-plus"></i> Add to Cart
+                                        </button>
+                                    </div>
+                                </form>
+                            {% else %}
+                                <button class="btn btn-secondary btn-lg w-100" disabled>
+                                    Sold Out
+                                </button>
+                            {% endif %}
                         {% else %}
                             <a href="{% url 'accounts:login' %}" class="btn btn-primary btn-lg w-100">
                                 Login to Buy Tickets
@@ -85,7 +97,27 @@
             </div>
         </div>
     </div>
-    
+    <!-- Add this after the Organizer card -->
+            <div class="card mt-3">
+                <div class="card-body">
+                    <h5 class="card-title">Add to Calendar</h5>
+                    <div class="d-grid gap-2">
+                        <!-- Google Calendar -->
+                        <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text={{ event.title|urlencode }}&dates={{ event.date_time|date:'Ymd' }}T{{ event.date_time|date:'His' }}/{{ event.date_time|date:'Ymd' }}T{{ event.date_time|date:'His' }}&location={{ event.location|urlencode }}&details={{ event.description|urlencode|truncatewords:50 }}" 
+                           target="_blank" 
+                           class="btn btn-outline-danger">
+                            <i class="bi bi-google"></i> Add to Google Calendar
+                        </a>
+                        
+                        <!-- Outlook -->
+                        <a href="https://outlook.live.com/calendar/0/deeplink/compose?subject={{ event.title|urlencode }}&startdt={{ event.date_time|date:'Ymd' }}T{{ event.date_time|date:'His' }}&location={{ event.location|urlencode }}&body={{ event.description|urlencode|truncatewords:50 }}" 
+                           target="_blank" 
+                           class="btn btn-outline-primary">
+                            <i class="bi bi-microsoft"></i> Add to Outlook
+                        </a>
+                    </div>
+                </div>
+            </div>
     <div class="mt-4">
         <a href="{% url 'events:event_list' %}" class="btn btn-secondary">
             <i class="bi bi-arrow-left"></i> Back to Events

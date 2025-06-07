@@ -12,6 +12,15 @@
         body {
             background-color: #f5f5f5;
         }
+        .nav-link.btn-link {
+            border: none;
+            padding: 0.5rem 1rem;
+            text-decoration: none;
+            color: rgba(255,255,255,.75);
+        }
+        .nav-link.btn-link:hover {
+            color: rgba(255,255,255,1);
+        }
     </style>
 </head>
 <body>
@@ -29,6 +38,27 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'events:event_list' %}">Events</a>
                     </li>
+                    {% if user.is_authenticated %}
+                        {% if user.role == 'CUSTOMER' %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'events:event_create' %}">List Event</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'events:my_events' %}">My Events</a>
+                            </li>
+                        {% endif %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'tickets:cart' %}">
+                                <i class="bi bi-cart"></i> Cart
+                                {% if cart_item_count > 0 %}
+                                    <span class="badge bg-danger">{{ cart_item_count }}</span>
+                                {% endif %}
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'tickets:my_orders' %}">My Orders</a>
+                        </li>
+                    {% endif %}
                 </ul>
                 <ul class="navbar-nav ms-auto">
                     {% if user.is_authenticated %}
@@ -36,7 +66,10 @@
                             <a class="nav-link" href="{% url 'accounts:profile' %}">Profile</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'accounts:logout' %}">Logout</a>
+                            <form method="post" action="{% url 'accounts:logout' %}" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="nav-link btn btn-link">Logout</button>
+                            </form>
                         </li>
                         <li class="nav-item">
                             <span class="navbar-text ms-3">

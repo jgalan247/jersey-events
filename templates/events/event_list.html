@@ -4,7 +4,128 @@
 
 {% block content %}
 <div class="container mt-4">
-    <h1 class="mb-4">Upcoming Events</h1>
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1>Upcoming Events</h1>
+        </div>
+        <div class="col-md-4">
+            <!-- Search Form -->
+            <form method="get" action="{% url 'events:event_list' %}">
+                <div class="input-group">
+                    <input type="text" name="search" class="form-control" 
+                           placeholder="Search events..." value="{{ search_query }}">
+                    {% if selected_category %}
+                        <input type="hidden" name="category" value="{{ selected_category }}">
+                    {% endif %}
+                    {% if date_filter %}
+                        <input type="hidden" name="date_filter" value="{{ date_filter }}">
+                    {% endif %}
+                    {% if sort_by != 'date' %}
+                        <input type="hidden" name="sort" value="{{ sort_by }}">
+                    {% endif %}
+                    <button class="btn btn-outline-primary" type="submit">
+                        <i class="bi bi-search"></i>
+                    </button>
+                    {% if search_query %}
+                        <a href="{% url 'events:event_list' %}{% if query_params %}?{{ query_params }}{% endif %}" 
+                           class="btn btn-outline-secondary">
+                            <i class="bi bi-x"></i>
+                        </a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Category Filter Buttons -->
+    <div class="mb-3">
+        <div class="btn-group flex-wrap" role="group" aria-label="Category filter">
+            <a href="?{% if search_query %}search={{ search_query }}&{% endif %}{% if date_filter %}date_filter={{ date_filter }}&{% endif %}{% if sort_by != 'date' %}sort={{ sort_by }}{% endif %}" 
+               class="btn {% if not selected_category %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                All Events
+            </a>
+            {% for value, label in categories %}
+                <a href="?category={{ value }}{% if search_query %}&search={{ search_query }}{% endif %}{% if date_filter %}&date_filter={{ date_filter }}{% endif %}{% if sort_by != 'date' %}&sort={{ sort_by }}{% endif %}" 
+                   class="btn {% if selected_category == value %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                    {{ label }}
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <!-- Advanced Filters Row -->
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <!-- Date Range Filter -->
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-sm btn-outline-secondary disabled">Date:</button>
+                <a href="?{% if selected_category %}category={{ selected_category }}&{% endif %}{% if search_query %}search={{ search_query }}&{% endif %}{% if sort_by != 'date' %}sort={{ sort_by }}{% endif %}" 
+                   class="btn btn-sm {% if not date_filter %}btn-secondary{% else %}btn-outline-secondary{% endif %}">
+                    All Dates
+                </a>
+                <a href="?{% if selected_category %}category={{ selected_category }}&{% endif %}{% if search_query %}search={{ search_query }}&{% endif %}date_filter=today{% if sort_by != 'date' %}&sort={{ sort_by }}{% endif %}" 
+                   class="btn btn-sm {% if date_filter == 'today' %}btn-secondary{% else %}btn-outline-secondary{% endif %}">
+                    Today
+                </a>
+                <a href="?{% if selected_category %}category={{ selected_category }}&{% endif %}{% if search_query %}search={{ search_query }}&{% endif %}date_filter=this_week{% if sort_by != 'date' %}&sort={{ sort_by }}{% endif %}" 
+                   class="btn btn-sm {% if date_filter == 'this_week' %}btn-secondary{% else %}btn-outline-secondary{% endif %}">
+                    This Week
+                </a>
+                <a href="?{% if selected_category %}category={{ selected_category }}&{% endif %}{% if search_query %}search={{ search_query }}&{% endif %}date_filter=this_month{% if sort_by != 'date' %}&sort={{ sort_by }}{% endif %}" 
+                   class="btn btn-sm {% if date_filter == 'this_month' %}btn-secondary{% else %}btn-outline-secondary{% endif %}">
+                    This Month
+                </a>
+            </div>
+        </div>
+        <div class="col-md-6 text-md-end">
+            <!-- Sort Dropdown -->
+            <div class="dropdown d-inline-block">
+                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="sortDropdown" data-bs-toggle="dropdown">
+                    Sort by: 
+                    {% if sort_by == 'date' %}Date (Earliest)
+                    {% elif sort_by == 'date_desc' %}Date (Latest)
+                    {% elif sort_by == 'title' %}Title
+                    {% elif sort_by == 'price' %}Price (Low to High)
+                    {% elif sort_by == 'price_desc' %}Price (High to Low)
+                    {% endif %}
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="?{% if selected_category %}category={{ selected_category }}&{% endif %}{% if search_query %}search={{ search_query }}&{% endif %}{% if date_filter %}date_filter={{ date_filter }}&{% endif %}sort=date">Date (Earliest First)</a></li>
+                    <li><a class="dropdown-item" href="?{% if selected_category %}category={{ selected_category }}&{% endif %}{% if search_query %}search={{ search_query }}&{% endif %}{% if date_filter %}date_filter={{ date_filter }}&{% endif %}sort=date_desc">Date (Latest First)</a></li>
+                    <li><a class="dropdown-item" href="?{% if selected_category %}category={{ selected_category }}&{% endif %}{% if search_query %}search={{ search_query }}&{% endif %}{% if date_filter %}date_filter={{ date_filter }}&{% endif %}sort=title">Title (A-Z)</a></li>
+                    <li><a class="dropdown-item" href="?{% if selected_category %}category={{ selected_category }}&{% endif %}{% if search_query %}search={{ search_query }}&{% endif %}{% if date_filter %}date_filter={{ date_filter }}&{% endif %}sort=price">Price (Low to High)</a></li>
+                    <li><a class="dropdown-item" href="?{% if selected_category %}category={{ selected_category }}&{% endif %}{% if search_query %}search={{ search_query }}&{% endif %}{% if date_filter %}date_filter={{ date_filter }}&{% endif %}sort=price_desc">Price (High to Low)</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    {% if selected_category or search_query or date_filter %}
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            <small>
+                Active filters:
+                {% if search_query %}
+                    <strong>Search:</strong> "{{ search_query }}"
+                {% endif %}
+                {% if selected_category %}
+                    {% if search_query %} | {% endif %}
+                    <strong>Category:</strong>
+                    {% for value, label in categories %}
+                        {% if value == selected_category %}{{ label }}{% endif %}
+                    {% endfor %}
+                {% endif %}
+                {% if date_filter %}
+                    {% if search_query or selected_category %} | {% endif %}
+                    <strong>Date:</strong> 
+                    {% if date_filter == 'today' %}Today
+                    {% elif date_filter == 'this_week' %}This Week
+                    {% elif date_filter == 'this_month' %}This Month
+                    {% endif %}
+                {% endif %}
+            </small>
+            <a href="{% url 'events:event_list' %}" class="btn-close" aria-label="Clear all filters"></a>
+        </div>
+    {% endif %}
     
     {% if events %}
         <div class="row">
@@ -41,7 +162,7 @@
                 <ul class="pagination justify-content-center">
                     {% if page_obj.has_previous %}
                         <li class="page-item">
-                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+                            <a class="page-link" href="?{% if query_params %}{{ query_params }}&{% endif %}page={{ page_obj.previous_page_number }}">Previous</a>
                         </li>
                     {% endif %}
                     
@@ -52,14 +173,14 @@
                             </li>
                         {% else %}
                             <li class="page-item">
-                                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                                <a class="page-link" href="?{% if query_params %}{{ query_params }}&{% endif %}page={{ num }}">{{ num }}</a>
                             </li>
                         {% endif %}
                     {% endfor %}
                     
                     {% if page_obj.has_next %}
                         <li class="page-item">
-                            <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+                            <a class="page-link" href="?{% if query_params %}{{ query_params }}&{% endif %}page={{ page_obj.next_page_number }}">Next</a>
                         </li>
                     {% endif %}
                 </ul>
@@ -67,8 +188,14 @@
         {% endif %}
     {% else %}
         <div class="alert alert-info" role="alert">
-            <h4 class="alert-heading">No events yet!</h4>
-            <p>There are no upcoming events at the moment. Check back soon!</p>
+            <h4 class="alert-heading">No events found!</h4>
+            <p>
+                {% if search_query or selected_category or date_filter %}
+                    No events match your current filters. Try adjusting your search criteria.
+                {% else %}
+                    There are no upcoming events at the moment. Check back soon!
+                {% endif %}
+            </p>
         </div>
     {% endif %}
 </div>

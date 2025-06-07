@@ -1,7 +1,4 @@
 from django.db import models
-
-# Create your models here.
-from django.db import models
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from django.core.validators import MinValueValidator
@@ -89,9 +86,18 @@ class Event(models.Model):
     
     @property
     def available_tickets(self):
-        """Calculate available tickets (to be implemented with ticket model)"""
-        # For now, return capacity. Will update when we add ticket purchasing
-        return self.capacity
+        """Calculate available tickets"""
+        from tickets.models import Ticket  # Import here to avoid circular import
+        
+        # Count sold tickets for this event
+        sold_tickets = Ticket.objects.filter(
+            event=self,
+            order__status='COMPLETED'
+        ).aggregate(
+            total_sold=models.Sum('quantity')
+        )['total_sold'] or 0
+        
+        return self.capacity - sold_tickets
     
     def can_edit(self, user):
         """Check if user can edit this event"""
